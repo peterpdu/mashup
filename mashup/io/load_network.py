@@ -2,7 +2,8 @@
 
 import numpy as np
 import pandas as pd
-import networkx as nx
+
+from ..utils.matrix_convert import edge_to_adj
 
 
 def load_network(f, genelist):
@@ -14,8 +15,7 @@ def load_network(f, genelist):
     if s == 3:
         print('Edge list detected')
         df = pd.read_table(f, header=None)
-        G = nx.convert_matrix.from_pandas_edgelist(df, source=0, target=1, edge_attr=2)
-        a = nx.convert_matrix.to_pandas_adjacency(G, weight=2)
+        a = edge_to_adj(df)
         a = a.reindex(genelist).T.reindex(genelist)
         a = a.replace(np.NaN, 0)
     # adjacency matrix
