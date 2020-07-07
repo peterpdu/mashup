@@ -15,7 +15,7 @@ def getParser():
     req = parser.add_argument_group('required')
     opt = parser.add_argument_group('optional')
     req.add_argument('--networks',
-                     help='3 column edge lists or square adjacency matrix',
+                     help='3 column edge lists or square adjacency matrix (txt or npy)',
                      type=str,
                      nargs='+',
                      required=True)
@@ -23,6 +23,10 @@ def getParser():
                      help='gene list',
                      type=str,
                      required=True)
+    opt.add_argument('--prefix',
+                     help='output prefix file label',
+                     type=str,
+                     default='mashup')
     opt.add_argument('--nfold',
                      help='cross validation trials; default=5',
                      type=int,
@@ -39,11 +43,13 @@ def getParser():
 
 if __name__ == '__main__':
     args = getParser().parse_args()
+
     infiles = args.networks
     nfold = args.nfold
     do_svd = not args.no_svd
     ndim = args.ndim
-    outdir = os.path.dirname(args.genes)
+
+    prefix = os.path.join(os.path.dirname(args.genes), args.prefix)
     genelist = pd.read_table(args.genes, header=None)[0].tolist()
     ngenes = len(genelist)
 
@@ -51,7 +57,7 @@ if __name__ == '__main__':
     print('[Mashup]')
     x = mashup(infiles, genelist, ndim, do_svd)
 
-    outpath = os.path.join(outdir, 'mashup.npy')
+    outpath = prefix + '.npy'
     print(f'Saving outputs to {outpath}')
     np.save(outpath, x)
 

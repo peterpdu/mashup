@@ -9,16 +9,18 @@ from .math.vector_embedding import vector_embedding
 
 
 def mashup(infiles, genelist, ndim, do_svd):
-    ngene = len(genelist)
+    ngenes = len(genelist)
     if do_svd:
-        rr_sum = np.zeros(ngene)
+        rr_sum = np.zeros(ngenes)
         for f in infiles:
             print(f'Loading {f}')
             a = load_network(f, genelist)
+            # must be positive
+            a = a.abs()
             print('Running diffusion')
             q = rwr(a, 0.5)
             # smoothing
-            r = np.log(q + 1/ngene)
+            r = np.log(q + 1/ngenes)
             rr_sum = rr_sum + np.matmul(r, r.T)
             print()
         print('ALl networks loaded. Learning vectors via SVD...')
@@ -30,6 +32,8 @@ def mashup(infiles, genelist, ndim, do_svd):
         for f in infiles:
             print(f'Loading {f}')
             a = load_network(f, genelist)
+            # must be positive
+            a = a.abs()
             print('Running diffusion')
             q = rwr(a, 0.5)
 
