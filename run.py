@@ -1,6 +1,5 @@
 #!/usr/bin/env python3.6
 
-
 import os, argparse
 
 import numpy as np
@@ -51,8 +50,10 @@ if __name__ == '__main__':
     # perform mashup
     print('[Mashup]')
     x = mashup(infiles, genelist, ndim, do_svd)
-    print('Saving outputs')
-    np.save(os.path.join(outdir, 'mashup.npy'), x)
+
+    outpath = os.path.join(outdir, 'mashup.npy')
+    print(f'Saving outputs to {outpath}')
+    np.save(outpath, x)
 
     exit(0)
     # load benchmark data
