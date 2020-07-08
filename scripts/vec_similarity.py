@@ -17,4 +17,5 @@ if __name__ == '__main__':
     a = np.load(f)
     df = pd.DataFrame(a)
     p = correlate(df)
+    np.fill_diagonal(p.values, 0)
     np.save(outpath, p.values)
