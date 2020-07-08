@@ -4,8 +4,8 @@ import numpy as np
 from scipy.sparse.linalg import eigsh
 
 from .io.load_network import load_network
-from .math.rwr import rwr
-from .math.vector_embedding import vector_embedding
+from .calculate.rwr import rwr
+from .calculate.vector_embedding import vector_embedding
 
 
 def mashup(infiles, genelist, ndim, do_svd):

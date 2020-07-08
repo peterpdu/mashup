@@ -8,7 +8,8 @@ import pandas as pd
 import matplotlib as mpl
 import matplotlib.pyplot as plt
 
-from ..eval.enrichment import hart_enrichment, pan_enrichment, wainberg_enrichment
+from mashup.eval.enrichment import hart_enrichment, pan_enrichment, wainberg_enrichment
+
 
 mpl.rc('pdf', fonttype=42)
 mpl.rc('font', family='sans-serif')
@@ -36,7 +37,7 @@ def getParser():
                      required=True)
 
     opt.add_argument('--prefix',
-                     help='output prefix file label',
+                     help='output prefix file label; default=method flag',
                      type=str,
                      default=None)
     opt.add_argument('--method',
@@ -51,6 +52,9 @@ if __name__ == '__main__':
     infiles = args.inputs
     outdir = os.path.dirname(infiles[0])
     method = args.method
+    prefix = args.prefix
+    if prefix is None:
+        prefix = method
 
     # load genes
     genes = pd.read_table(args.genes, header=None)[0].tolist()
@@ -84,9 +88,9 @@ if __name__ == '__main__':
         results.append(enrichment)
 
     # save results
-    names = [os.path.basename(os.path.splitext(_)[0]) for _ in args.infiles]
+    names = [os.path.basename(os.path.splitext(_)[0]) for _ in infiles]
     results = pd.DataFrame(results, index=names)
-    outpath = os.path.join(outdir, 'enrichments.txt')
+    outpath = os.path.join(outdir, prefix + '_enrichments.txt')
     print('Writing results to {}'.format(outpath))
     results.to_csv(outpath, sep='\t')
 
@@ -97,7 +101,7 @@ if __name__ == '__main__':
     plt.legend()
     plt.ylabel('{} enrichment'.format(method))
     plt.title(os.path.basename(os.path.splitext(args.database)[0]))
-    
-    outpath = os.path.join(outdir, 'enrichments.pdf')
+
+    outpath = os.path.join(outdir, prefix + '_enrichments.pdf')
     print('Saving figure to {}'.format(outpath))
     plt.savefig(outpath)

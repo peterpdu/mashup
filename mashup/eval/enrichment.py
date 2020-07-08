@@ -31,6 +31,7 @@ def hart_enrichment(x, annot, bin_size=1000, num_bins=100):
         coocc = pd.DataFrame(coocc, index=annot.columns, columns=annot.columns)
         coocc.index.name = None
         annot = adj_to_edge(coocc)
+    annot.columns = ['source', 'target', 'weight']
     G = nx.convert_matrix.from_pandas_edgelist(annot, edge_attr='weight')
 
     if len(e) < (num_bins * bin_size):
@@ -70,6 +71,7 @@ def pan_enrichment(x, annot, bin_size=1000, num_bins=100):
         coocc = pd.DataFrame(coocc, index=annot.columns, columns=annot.columns)
         coocc.index.name = None
         annot = adj_to_edge(coocc)
+    annot.columns = ['source', 'target', 'weight']
     G = nx.convert_matrix.from_pandas_edgelist(annot, edge_attr='weight')
 
     total_interaction_fraction = G.number_of_edges() / G.number_of_nodes() ** 2
@@ -110,6 +112,7 @@ def wainberg_enrichment(x, annot, n=10):
         coocc = pd.DataFrame(coocc, index=annot.columns, columns=annot.columns)
         coocc.index.name = None
         annot = adj_to_edge(coocc)
+    annot.columns = ['source', 'target', 'weight']
     G = nx.convert_matrix.from_pandas_edgelist(annot, edge_attr='weight')
 
     # num_edges / num_nodes ^ 2
