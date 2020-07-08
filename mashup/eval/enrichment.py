@@ -41,9 +41,9 @@ def hart_enrichment(x, annot, bin_size=1000, num_bins=100):
     print('Calculating enrichment')
     for split in tqdm(np.split(e, num_bins), total=num_bins):
         split['annot'] = [G.has_edge(g1, g2) for g1, g2 in zip(split['source'], split['target'])]
-        tpr = split['annot'].sum() / bin_size
-        fpr = (bin_size - split['annot'].sum()) / bin_size
-        enrichment.append(np.log2(tpr / fpr))
+        tp = split['annot'].sum()
+        fp = (bin_size - split['annot'].sum())
+        enrichment.append(np.log2(tp / fp))
 
     return enrichment
 
@@ -94,7 +94,7 @@ def wainberg_enrichment(x, annot, n=10):
     fraction of true positive interactions : total number of interactions
     considering the top N partners
     :param x: adjacency matrix
-    :param annot: gene x class matrix
+    :param annot: edge list or gene x class matrix
     :param n: calculated with up to n partners
     :return: enrichment values
     """
@@ -123,8 +123,11 @@ def wainberg_enrichment(x, annot, n=10):
         tp = 0
         # get top n partners
         for top_n in zip(x.columns, *[x.columns[top_idx[_]] for _ in range(i+1)]):
-            # genes all neighbors to root
-            tp += all([_ in list(G.neighbors(top_n[0])) for _ in top_n[1:]])
+            # genes are all neighbors to root
+            try:
+                tp += all([_ in list(G.neighbors(top_n[0])) for _ in top_n[1:]])
+            except nx.NetworkXError:
+                pass
         enrichment.append(tp / n_genes / total_interaction_fraction)
 
     return enrichment
