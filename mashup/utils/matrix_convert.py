@@ -12,7 +12,7 @@ def edge_to_adj(e):
 
 
 def adj_to_edge(a, undirected=True):
-    ac = a.copy()
+    ac = a.copy().astype(float)
     if undirected:
         ac.values[np.tril_indices(ac.shape[0], -1)] = np.NaN
     e = ac.stack().reset_index()
