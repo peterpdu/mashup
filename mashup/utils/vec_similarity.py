@@ -17,4 +17,4 @@ if __name__ == '__main__':
     a = np.load(f)
     df = pd.DataFrame(a)
     p = correlate(df)
-    np.save(p.values, outpath)
+    np.save(outpath, p.values)
