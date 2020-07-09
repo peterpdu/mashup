@@ -79,7 +79,6 @@ if __name__ == '__main__':
         a = np.load(f)
         df = pd.DataFrame(a, index=genes, columns=genes)
 
-        results = []
         if method == 'hart2017':
             enrichment = hart_enrichment(df, annot)
         elif method == 'pan2018':
