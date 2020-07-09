@@ -126,7 +126,7 @@ def wainberg_enrichment(x, annot, n=10):
         tp = 0
         # get top n partners
         for top_n in zip(x.columns, *[x.columns[top_idx[_]] for _ in range(i+1)]):
-            # genes are all neighbors to root
+            # genes are all neighbors to root (no necessarily same pathway)
             try:
                 tp += all([_ in list(G.neighbors(top_n[0])) for _ in top_n[1:]])
             except nx.NetworkXError:

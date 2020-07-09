@@ -65,18 +65,19 @@ if __name__ == '__main__':
         s = len(line.split('\t'))
         handle.close()
     if s == 3:
-        annot = pd.read_table(args.database)
+        annot = pd.read_table(args.database, header=None)
     elif s > 3:
         annot = pd.read_table(args.database, index_col=0)
     else:
         raise ValueError('Incorrect database format detected')
 
     print('Calculating enrichments')
-    results = []
+    results = pd.DataFrame()
     for f in infiles:
         print(f)
-        df = np.load(f)
-        df = pd.DataFrame(df, index=genes, columns=genes)
+        name = os.path.basename(os.path.splitext(f)[0])
+        a = np.load(f)
+        df = pd.DataFrame(a, index=genes, columns=genes)
 
         results = []
         if method == 'hart2017':
@@ -85,19 +86,18 @@ if __name__ == '__main__':
             enrichment = pan_enrichment(df, annot)
         else:   # wainberg
             enrichment = wainberg_enrichment(df, annot)
-        results.append(enrichment)
+        results[name] = enrichment
+        print()
 
     # save results
-    names = [os.path.basename(os.path.splitext(_)[0]) for _ in infiles]
-    results = pd.DataFrame(results, index=names)
     outpath = os.path.join(outdir, prefix + '_enrichments.txt')
     print('Writing results to {}'.format(outpath))
     results.to_csv(outpath, sep='\t')
 
     # save figure
-    for i in results.index:
-        v = results.loc[i].values
-        plt.plot(range(len(v)), v, label=i)
+    for c in results.columns:
+        v = results[c]
+        plt.plot(range(len(v)), v, label=c)
     plt.legend()
     plt.ylabel('{} enrichment'.format(method))
     plt.title(os.path.basename(os.path.splitext(args.database)[0]))
