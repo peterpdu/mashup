@@ -2,6 +2,7 @@
 
 import sys, os
 import numpy as np
+import pandas as pd
 from scipy.spatial import distance
 
 
@@ -17,7 +18,10 @@ if __name__ == '__main__':
     outpath = os.path.splitext(f)[0] + '_{metric}_corr.npy'
 
     # assumes data is features x genes
-    a = np.load(f)
+    if f.endswith('.npy'):
+        a = np.load(f)
+    else:
+        a = pd.read_table(f, index_col=0).values
     if metric == 'dotprod':
         p = distance.squareform(distance.pdist(a.T, metric='cosine'))
         p = p * np.dot(a.T, a)
