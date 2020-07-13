@@ -5,7 +5,7 @@ import pandas as pd
 
 from ..utils.matrix_convert import edge_to_adj
 
-
+# TODO: directed networks
 def load_network(f, genelist):
     # text file
     if f.endswith('.txt'):
@@ -35,7 +35,7 @@ def load_network(f, genelist):
         a = pd.DataFrame(a, index=genelist, columns=genelist)
     else:
         raise ValueError('input file must be .txt or .npy')
-
+    # TODO: don't need to symmetrize if directed
     if not np.all(a.values == a.values.T):
         # symmetrize
         a = a + a.T

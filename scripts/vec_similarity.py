@@ -15,7 +15,7 @@ if __name__ == '__main__':
     assert metric in ['cosine', 'correlation', 'dotprod', 'euclidean']
 
     f = sys.argv[1]
-    outpath = os.path.splitext(f)[0] + '_{metric}_corr.npy'
+    outpath = os.path.splitext(f)[0] + f'_{metric}_corr.npy'
 
     # assumes data is features x genes
     if f.endswith('.npy'):
