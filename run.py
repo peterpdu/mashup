@@ -20,7 +20,7 @@ def getParser():
                      nargs='+',
                      required=True)
     req.add_argument('--genes',
-                     help='gene list',
+                     help='gene universe (must correspond to all npy inputs)',
                      type=str,
                      required=True)
     opt.add_argument('--prefix',

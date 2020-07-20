@@ -14,7 +14,7 @@ def hart_enrichment(x, annot, bin_size=1000, num_bins=100):
     [Hart et al., 2017]
     fraction of true positive interactions : fraction of false positive interactions (log2)
     in bins of 1000 ranked pairs
-    :param x: adjacency matrix
+    :param x: adjacency matrix dataframe
     :param annot: edge list or gene x class matrix
     :param bin_size: ranked gene pairs over bins
     :param num_bins: number of bins to calculate
@@ -32,6 +32,11 @@ def hart_enrichment(x, annot, bin_size=1000, num_bins=100):
         coocc.index.name = None
         annot = adj_to_edge(coocc)
     annot.columns = ['source', 'target', 'weight']
+
+    # subset annotations to only genes in x
+    annot = annot[annot['source'].isin(x.index) & annot['target'].isin(x.index)]
+
+    # convert to graph
     G = nx.convert_matrix.from_pandas_edgelist(annot, edge_attr='weight')
 
     if len(e) < (num_bins * bin_size):
@@ -54,7 +59,7 @@ def pan_enrichment(x, annot, bin_size=1000, num_bins=100):
     [Pan et al., 2018]
     fraction of true positive interactions : total number of interactions
     in bins of 1000 ranked pairs
-    :param x: adjacency matrix
+    :param x: adjacency matrix dataframe
     :param annot: edge list or gene x class matrix
     :param bin_size: ranked gene pairs over windows
     :param num_bins: number of windows to calculate over
@@ -72,9 +77,17 @@ def pan_enrichment(x, annot, bin_size=1000, num_bins=100):
         coocc.index.name = None
         annot = adj_to_edge(coocc)
     annot.columns = ['source', 'target', 'weight']
+
+    # subset annotations to only genes in x
+    annot = annot[annot['source'].isin(x.index) & annot['target'].isin(x.index)]
+
+    # convert to graph
     G = nx.convert_matrix.from_pandas_edgelist(annot, edge_attr='weight')
 
-    total_interaction_fraction = G.number_of_edges() / G.number_of_nodes() ** 2
+    # num_edges / total pairwise interactions
+    n_genes = x.shape[0]
+    total_interactions = (n_genes ** 2 - n_genes) / 2
+    total_interaction_fraction = G.number_of_edges() / total_interactions
 
     if len(e) < bin_size * num_bins:
         num_bins = int(len(e) / bin_size)
@@ -95,7 +108,7 @@ def wainberg_enrichment(x, annot, n=10):
     [Wainberg, Kamber, Balsubramani et al., preprint]
     fraction of true positive interactions : total number of interactions
     considering the top N partners
-    :param x: adjacency matrix
+    :param x: adjacency matrix dataframe
     :param annot: edge list or gene x class matrix
     :param n: calculated with up to n partners
     :return: enrichment values
@@ -113,11 +126,16 @@ def wainberg_enrichment(x, annot, n=10):
         coocc.index.name = None
         annot = adj_to_edge(coocc)
     annot.columns = ['source', 'target', 'weight']
+    # subset annotations to only genes in x
+    annot = annot[annot['source'].isin(x.index) & annot['target'].isin(x.index)]
+
+    # convert to graph
     G = nx.convert_matrix.from_pandas_edgelist(annot, edge_attr='weight')
 
-    # num_edges / num_nodes ^ 2
-    total_interaction_fraction = G.number_of_edges() / G.number_of_nodes() ** 2
+    # num_edges / total pairwise interactions
     n_genes = x.shape[0]
+    total_interactions = (n_genes ** 2 - n_genes) / 2
+    total_interaction_fraction = G.number_of_edges() / total_interactions
     enrichment = []
 
     print('Calculating enrichment')
@@ -126,7 +144,7 @@ def wainberg_enrichment(x, annot, n=10):
         tp = 0
         # get top n partners
         for top_n in zip(x.columns, *[x.columns[top_idx[_]] for _ in range(i+1)]):
-            # genes are all neighbors to root (no necessarily same pathway)
+            # genes are all neighbors to root (not necessarily all in same pathway)
             try:
                 tp += all([_ in list(G.neighbors(top_n[0])) for _ in top_n[1:]])
             except nx.NetworkXError:

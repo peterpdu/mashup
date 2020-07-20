@@ -6,6 +6,7 @@ import pandas as pd
 from scipy.spatial import distance
 
 
+# vec_similarity.py input.npy sim_metric
 if __name__ == '__main__':
     # metric = 'cosine'
     # metric = 'correlation'
