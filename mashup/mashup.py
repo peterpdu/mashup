@@ -25,8 +25,7 @@ def mashup(infiles, genelist, ndim, do_svd):
             print()
         print('ALl networks loaded. Learning vectors via SVD...')
         w, v = eigsh(rr_sum, ndim, which='LM')
-        d = np.diag(w)
-        x = np.matmul(np.diag(np.sqrt(np.sqrt(np.diag(d)))), v.T)
+        x = np.matmul(np.diag(np.sqrt(np.sqrt(w))), v.T)
     else:
         q_concat = []
         for f in infiles:
