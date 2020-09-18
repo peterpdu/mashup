@@ -8,7 +8,7 @@ import pandas as pd
 import matplotlib as mpl
 import matplotlib.pyplot as plt
 
-from mashup.eval.enrichment import hart_enrichment, pan_enrichment, wainberg_enrichment
+from mashup.eval.enrichment import hart_enrichment, pan_enrichment, wainberg_enrichment, wainberg_strict_enrichment
 
 
 mpl.rc('pdf', fonttype=42)
@@ -41,9 +41,9 @@ def getParser():
                      type=str,
                      default=None)
     opt.add_argument('--method',
-                     help='enrichment method; default=pan2018',
-                     choices=('hart2017', 'pan2018', 'wainberg'),
-                     default='pan2018')
+                     help='enrichment method; default=wainberg_strict',
+                     choices=('hart2017', 'pan2018', 'wainberg_strict'),
+                     default='wainberg_strict')
     return parser
 
 
@@ -83,8 +83,10 @@ if __name__ == '__main__':
             enrichment = hart_enrichment(df, annot)
         elif method == 'pan2018':
             enrichment = pan_enrichment(df, annot)
-        else:   # wainberg
+        elif method == 'wainberg':
             enrichment = wainberg_enrichment(df, annot)
+        else:   # wainberg_strict
+            enrichment = wainberg_strict_enrichment(df, annot)
         results[name] = enrichment
         print()
 

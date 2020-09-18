@@ -107,6 +107,60 @@ def wainberg_enrichment(x, annot, n=10):
     """
     [Wainberg, Kamber, Balsubramani et al., preprint]
     fraction of true positive interactions : total number of interactions
+    considering the top N partners; symmetrizes lowest rank
+    :param x: adjacency matrix dataframe
+    :param annot: edge list or gene x class matrix
+    :param n: calculated with up to n partners
+    :return: enrichment values
+    """
+
+    def top_k(arr, k):
+        idx = np.argpartition(arr, -1 * k)[-1 * k:]
+        return idx[np.argsort(arr[idx])]
+
+    print('Building reference graph')
+    if len(annot.columns) > 3:
+        # gene x class matrix
+        coocc = np.matmul(annot.values.T, annot.values)
+        coocc = pd.DataFrame(coocc, index=annot.columns, columns=annot.columns)
+        coocc.index.name = None
+        annot = adj_to_edge(coocc)
+    annot.columns = ['source', 'target', 'weight']
+    # subset annotations to only genes in x
+    annot = annot[annot['source'].isin(x.index) & annot['target'].isin(x.index)]
+
+    # convert to graph
+    G = nx.convert_matrix.from_pandas_edgelist(annot, edge_attr='weight')
+
+    # num_edges / total pairwise interactions
+    n_genes = x.shape[0]
+    total_interactions = (n_genes ** 2 - n_genes) / 2
+    total_interaction_fraction = G.number_of_edges() / total_interactions
+    enrichment = []
+
+    # symmetrize
+    x = np.maximum(x, x.T)
+
+    print('Calculating enrichment')
+    top_idx = np.apply_along_axis(lambda _: top_k(_, n), 0, x.values)
+    for i in tqdm(range(n), total=n):
+        tp = 0
+        # get top n partners
+        for top_n in zip(x.columns, *[x.columns[top_idx[_]] for _ in range(i+1)]):
+            # genes are all neighbors to root (not necessarily all in same pathway)
+            try:
+                tp += sum([_ in list(G.neighbors(top_n[0])) for _ in top_n[1:]]) / (i+1)
+            except nx.NetworkXError:
+                pass
+        enrichment.append(tp / n_genes / total_interaction_fraction)
+
+    return enrichment
+
+
+def wainberg_strict_enrichment(x, annot, n=10):
+    """
+    [Wainberg, Kamber, Balsubramani et al., preprint]
+    fraction of true positive interactions : total number of interactions
     considering the top N partners
     :param x: adjacency matrix dataframe
     :param annot: edge list or gene x class matrix
